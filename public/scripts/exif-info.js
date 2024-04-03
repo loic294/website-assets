@@ -62,7 +62,7 @@ async function main() {
 	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img");
 
 	if (galleryImagesWrapper?.length > 0) {
-		await import("../lib/piexifjs.js");
+		await import("./lib/piexifjs.js");
 
 		for (const galleryImage of galleryImagesWrapper) {
 			const imageName = galleryImage.attributes["alt"].value;
