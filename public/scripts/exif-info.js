@@ -104,3 +104,5 @@ function renderRational(value) {
 
 	return Math.round((value[0] / value[1]) * 100) / 100;
 }
+
+main();
