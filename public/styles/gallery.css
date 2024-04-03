@@ -57,12 +57,7 @@
 	display: none;
 }
 
-.exif-details-toggle:checked ~ .exif-data {
-	background-color: rgba(0, 0, 0, 0.7);
-}
-
-.exif-data:hover ~ .exif-details-wrapper,
-.exif-details-toggle:checked ~ .exif-details-wrapper {
+.exif-data:hover ~ .exif-details-wrapper {
 	display: block;
 	position: absolute;
 	bottom: 2.6rem;
