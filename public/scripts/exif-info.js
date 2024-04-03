@@ -83,10 +83,10 @@ async function main() {
 				const newDiv = document.createElement("div");
 				newDiv.className = "exif-wrapper";
 				newDiv.innerHTML = `
+        <input class="exif-details-toggle" id="${id}" type="checkbox" />
         <label class="exif-data" for="${id}">
           <span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
         </label>
-        <input class="exif-details-toggle" id="${id}" type="checkbox" />
         <div class="exif-details-wrapper">
           <div class="exif-details">
             ${renderValue("Lens", lens)}
