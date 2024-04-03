@@ -37,53 +37,6 @@ function debugExif(exif) {
 	return exifData;
 }
 
-async function main() {
-	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img");
-	console.log("galleryImagesWrapper", galleryImagesWrapper);
-
-	if (galleryImagesWrapper?.length > 0) {
-		await import("http://localhost:3000/lib/piexifjs.js");
-
-		for (const galleryImage of galleryImagesWrapper) {
-			console.log("gallery image src", galleryImage.attributes["data-src"].value + "?format=100w");
-			const base64Img = await imageUrlToBase64(galleryImage.attributes["data-src"].value + "?format=100w");
-			// console.log('BASE 64', base64Img)
-			let exif = debugExif(piexif.load(base64Img));
-			console.log("EXIF", exif);
-
-			const make = exif.Make;
-			const model = exif.Model;
-			const lens = exif.LensModel;
-			const aperture = renderRational(exif.FNumber);
-			const shutterspeed = renderRational(exif.ExposureTime);
-			const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
-			const iso = exif.ISOSpeedRatings;
-
-			if (make || model) {
-				const newDiv = document.createElement("div");
-				newDiv.className = "exif-wrapper";
-				newDiv.innerHTML = `
-        <div class="exif-data">
-          <span class="exif-camera">© ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
-        </div>
-        <div class="exif-details-wrapper">
-          <div class="exif-details">
-            ${renderValue("Lens", lens)}
-            ${renderValue("Focal Length", focallength, "", " mm")}
-            ${renderValue("Aperture", aperture, "f/ ")}
-            ${renderValue("Shutter Speed", shutterspeed, "", " s")}
-            ${renderValue("ISO", iso)}
-          </div>
-        <div>
-      `;
-
-				//galleryImage.parentElement.innerHTML = '';
-				galleryImage.parentElement.appendChild(newDiv);
-			}
-		}
-	}
-}
-
 function renderValue(key, value, prefix, suffix) {
 	return value
 		? `<div class="exif-info">
@@ -103,6 +56,48 @@ function renderRational(value) {
 	}
 
 	return Math.round((value[0] / value[1]) * 100) / 100;
+}
+
+async function main() {
+	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img");
+
+	if (galleryImagesWrapper?.length > 0) {
+		await import("http://localhost:3000/lib/piexifjs.js");
+
+		for (const galleryImage of galleryImagesWrapper) {
+			const base64Img = await imageUrlToBase64(galleryImage.attributes["data-src"].value + "?format=100w");
+			let exif = debugExif(piexif.load(base64Img));
+
+			const make = exif.Make;
+			const model = exif.Model;
+			const lens = exif.LensModel;
+			const aperture = renderRational(exif.FNumber);
+			const shutterspeed = renderRational(exif.ExposureTime);
+			const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
+			const iso = exif.ISOSpeedRatings;
+
+			if (make || model) {
+				const newDiv = document.createElement("div");
+				newDiv.className = "exif-wrapper";
+				newDiv.innerHTML = `
+        <div class="exif-data">
+          <span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
+        </div>
+        <div class="exif-details-wrapper">
+          <div class="exif-details">
+            ${renderValue("Lens", lens)}
+            ${renderValue("Focal Length", focallength, "", " mm")}
+            ${renderValue("Aperture", aperture, "f/ ")}
+            ${renderValue("Shutter Speed", shutterspeed, "", " s")}
+            ${renderValue("ISO", iso)}
+          </div>
+        <div>
+      `;
+
+				galleryImage.parentElement.appendChild(newDiv);
+			}
+		}
+	}
 }
 
 main();

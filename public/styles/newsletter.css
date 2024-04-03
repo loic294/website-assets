@@ -1,0 +1,16 @@
+.newsletter-form-header,
+.newsletter-form-footnote {
+	display: none;
+}
+
+.newsletter-form-field-wrapper.field.last-name {
+	display: none;
+	width: 0px !important;
+}
+
+.newsletter-block .newsletter-form-wrapper--layoutStack .newsletter-form-field-wrapper,
+.newsletter-form-fields-wrapper,
+.newsletter-form-name-fieldset {
+	width: 100% !important;
+	max-width: 100% !important;
+}

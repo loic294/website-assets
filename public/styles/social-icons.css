@@ -1,0 +1,26 @@
+.social-icons-size-extra-large .sqs-svg-icon--wrapper {
+	height: 64px !important;
+	width: 64px !important;
+}
+
+.sqs-svg-icon--list .sqs-svg-icon--wrapper:nth-child(4) .sqs-svg-icon--social,
+.sqs-svg-icon--list .sqs-svg-icon--wrapper:nth-child(5) .sqs-svg-icon--social {
+	display: none;
+}
+
+.sqs-svg-icon--list .sqs-svg-icon--wrapper:nth-child(4) > div,
+.sqs-svg-icon--list .sqs-svg-icon--wrapper:nth-child(5) > div {
+	background-color: var(--headingExtraLargeColor);
+	mask-mode: alpha;
+	mask-position: center;
+	mask-repeat: no-repeat;
+	mask-size: cover;
+}
+
+.sqs-svg-icon--list .sqs-svg-icon--wrapper[href*="vero"] > div {
+	mask-image: url(../icons/social-icons/vero.svg);
+}
+
+.sqs-svg-icon--list .sqs-svg-icon--wrapper[href*="mastodon"] > div {
+	mask-image: url(../icons/social-icons/mastodon.svg);
+}

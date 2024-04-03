@@ -1,7 +1,7 @@
 var DEV_SCRIPT_ID = "dev-script";
 var DEV_MODE_ENABLED = "IS_DEV";
 
-var isDevMode = localStorage.getItem(DEV_MODE_ENABLED) === true;
+var isDevMode = localStorage.getItem(DEV_MODE_ENABLED) === "true";
 
 var contentUrl = isDevMode ? "http://localhost:3000" : "https://assets.loicbellemarealford.ca";
 
