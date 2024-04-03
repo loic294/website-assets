@@ -11,7 +11,6 @@
 	flex-direction: row;
 	justify-content: center;
 	z-index: 10;
-	cursor: pointer;
 	user-select: auto;
 	pointer-events: all;
 }
@@ -23,13 +22,31 @@
 	padding: 0.7rem 1.2rem;
 	border-radius: 2.4rem;
 	color: white;
+	cursor: pointer;
+}
+
+.exif-camera {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.exif-camera img {
+	height: 1rem;
+	width: 1rem;
+}
+
+.exif-details-toggle {
+	display: none;
 }
 
 .exif-data ~ .exif-details-wrapper {
 	display: none;
 }
 
-.exif-data:hover ~ .exif-details-wrapper {
+.exif-data:hover ~ .exif-details-wrapper,
+.exif-details-toggle:checked ~ .exif-details-wrapper {
 	display: block;
 	position: absolute;
 	bottom: 2.6rem;

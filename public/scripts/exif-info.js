@@ -65,6 +65,9 @@ async function main() {
 		await import("http://localhost:3000/lib/piexifjs.js");
 
 		for (const galleryImage of galleryImagesWrapper) {
+			const imageName = galleryImage.attributes["alt"].value;
+			const id = imageName.replace(/\./g, "-");
+
 			const base64Img = await imageUrlToBase64(galleryImage.attributes["data-src"].value + "?format=100w");
 			let exif = debugExif(piexif.load(base64Img));
 
@@ -80,9 +83,10 @@ async function main() {
 				const newDiv = document.createElement("div");
 				newDiv.className = "exif-wrapper";
 				newDiv.innerHTML = `
-        <div class="exif-data">
+        <label class="exif-data" for="${id}">
           <span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
-        </div>
+        </label>
+        <input class="exif-details-toggle" id="${id}" type="checkbox" />
         <div class="exif-details-wrapper">
           <div class="exif-details">
             ${renderValue("Lens", lens)}
