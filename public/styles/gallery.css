@@ -2,6 +2,12 @@
 	overflow: visible !important;
 }
 
+@media screen and (max-width: 575px) {
+	.gallery-lightbox .gallery-lightbox-item-wrapper {
+		overflow: visible !important;
+	}
+}
+
 .exif-wrapper {
 	position: absolute;
 	bottom: -3rem;
@@ -13,6 +19,12 @@
 	z-index: 10;
 	user-select: auto;
 	pointer-events: all;
+}
+
+@media screen and (max-width: 575px) {
+	.exif-wrapper {
+		bottom: -1rem;
+	}
 }
 
 .exif-data {

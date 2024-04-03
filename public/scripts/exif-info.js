@@ -61,6 +61,8 @@ function renderRational(value) {
 async function main() {
 	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img");
 
+	console.log("IMGS", galleryImagesWrapper);
+
 	if (galleryImagesWrapper?.length > 0) {
 		await import("http://localhost:3000/lib/piexifjs.js");
 
@@ -70,6 +72,8 @@ async function main() {
 
 			const base64Img = await imageUrlToBase64(galleryImage.attributes["data-src"].value + "?format=100w");
 			let exif = debugExif(piexif.load(base64Img));
+
+			console.log("EXIF", exif);
 
 			const make = exif.Make;
 			const model = exif.Model;
