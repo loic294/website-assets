@@ -21,6 +21,12 @@
 	pointer-events: all;
 }
 
+@media screen and (max-width: 968px) {
+	.exif-wrapper {
+		bottom: -1.5rem;
+	}
+}
+
 @media screen and (max-width: 575px) {
 	.exif-wrapper {
 		bottom: -1rem;
