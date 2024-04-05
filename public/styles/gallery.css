@@ -10,7 +10,7 @@
 
 .exif-wrapper {
 	position: absolute;
-	bottom: -3rem;
+	bottom: 1rem;
 	left: 0;
 	width: 100%;
 	display: flex;
@@ -19,18 +19,6 @@
 	z-index: 10;
 	user-select: auto;
 	pointer-events: all;
-}
-
-@media screen and (max-width: 968px) {
-	.exif-wrapper {
-		bottom: -1.5rem;
-	}
-}
-
-@media screen and (max-width: 575px) {
-	.exif-wrapper {
-		bottom: -1rem;
-	}
 }
 
 .exif-data {
