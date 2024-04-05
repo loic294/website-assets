@@ -91,7 +91,9 @@ async function addExifInfo() {
 					const newDiv = document.createElement("div");
 					newDiv.className = "exif-wrapper";
 					newDiv.innerHTML = `
-					<span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
+					<div class="exif-data">
+						<span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
+					</div>
 					<div class="exif-details-wrapper">
 						<div class="exif-details">
 							${renderValue("Lens", lens)}
