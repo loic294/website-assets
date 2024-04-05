@@ -59,7 +59,7 @@ function renderRational(value) {
 }
 
 async function main() {
-	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img");
+	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img, .thumb-image");
 
 	if (galleryImagesWrapper?.length > 0) {
 		await import("./lib/piexifjs.js");
@@ -83,10 +83,7 @@ async function main() {
 				const newDiv = document.createElement("div");
 				newDiv.className = "exif-wrapper";
 				newDiv.innerHTML = `
-        <input class="exif-details-toggle" id="${id}" type="checkbox" />
-        <label class="exif-data" for="${id}">
-          <span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
-        </label>
+        <span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
         <div class="exif-details-wrapper">
           <div class="exif-details">
             ${renderValue("Lens", lens)}
