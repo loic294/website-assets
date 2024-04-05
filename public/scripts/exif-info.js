@@ -67,40 +67,46 @@ async function addExifInfo() {
 		console.log("FOUND GALLERY ON PAGE. Extracting photos exif data.");
 
 		for (const galleryImage of galleryImagesWrapper) {
-			const imageName = galleryImage.attributes["alt"].value;
-			const id = imageName.replace(/\./g, "-");
+			try {
+				const imageName = galleryImage.attributes["alt"].value;
+				const id = imageName.replace(/\./g, "-");
 
-			const imageUrl = galleryImage.attributes["data-src"].value + "?format=100w";
-			const base64Img = await imageUrlToBase64(imageUrl);
-			let exif = debugExif(piexif.load(base64Img));
+				const imageUrl = galleryImage.attributes["data-src"].value + "?format=100w";
 
-			const make = exif.Make;
-			const model = exif.Model;
-			const lens = exif.LensModel;
-			const aperture = renderRational(exif.FNumber);
-			const shutterspeed = renderRational(exif.ExposureTime);
-			const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
-			const iso = exif.ISOSpeedRatings;
+				console.log("IMG URL", imageUrl);
+				const base64Img = await imageUrlToBase64(imageUrl);
+				let exif = debugExif(piexif.load(base64Img));
 
-			console.log("Image", imageName, imageUrl, make, model, aperture);
+				const make = exif.Make;
+				const model = exif.Model;
+				const lens = exif.LensModel;
+				const aperture = renderRational(exif.FNumber);
+				const shutterspeed = renderRational(exif.ExposureTime);
+				const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
+				const iso = exif.ISOSpeedRatings;
 
-			if (make || model) {
-				const newDiv = document.createElement("div");
-				newDiv.className = "exif-wrapper";
-				newDiv.innerHTML = `
-        <span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
-        <div class="exif-details-wrapper">
-          <div class="exif-details">
-            ${renderValue("Lens", lens)}
-            ${renderValue("Focal Length", focallength, "", " mm")}
-            ${renderValue("Aperture", aperture, "f/ ")}
-            ${renderValue("Shutter Speed", shutterspeed, "", " s")}
-            ${renderValue("ISO", iso)}
-          </div>
-        <div>
-      `;
+				console.log("Image", imageName, imageUrl, make, model, aperture);
 
-				galleryImage.parentElement.appendChild(newDiv);
+				if (make || model) {
+					const newDiv = document.createElement("div");
+					newDiv.className = "exif-wrapper";
+					newDiv.innerHTML = `
+					<span class="exif-camera"><img src="${contentUrl}/icons/info.svg" /> ${make || ""} ${model?.replace("Canon ", "") || ""}</span>
+					<div class="exif-details-wrapper">
+						<div class="exif-details">
+							${renderValue("Lens", lens)}
+							${renderValue("Focal Length", focallength, "", " mm")}
+							${renderValue("Aperture", aperture, "f/ ")}
+							${renderValue("Shutter Speed", shutterspeed, "", " s")}
+							${renderValue("ISO", iso)}
+						</div>
+					<div>
+				`;
+
+					galleryImage.parentElement.appendChild(newDiv);
+				}
+			} catch (e) {
+				console.error("Error extracting Exif data", e);
 			}
 		}
 
