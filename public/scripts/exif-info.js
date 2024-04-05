@@ -70,7 +70,8 @@ async function main() {
 			const imageName = galleryImage.attributes["alt"].value;
 			const id = imageName.replace(/\./g, "-");
 
-			const base64Img = await imageUrlToBase64(galleryImage.attributes["data-src"].value + "?format=100w");
+			const imageUrl = galleryImage.attributes["data-src"].value + "?format=100w";
+			const base64Img = await imageUrlToBase64();
 			let exif = debugExif(piexif.load(base64Img));
 
 			const make = exif.Make;
@@ -80,6 +81,8 @@ async function main() {
 			const shutterspeed = renderRational(exif.ExposureTime);
 			const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
 			const iso = exif.ISOSpeedRatings;
+
+			console.log("Image", imageName, imageUrl, make, model, aperture);
 
 			if (make || model) {
 				const newDiv = document.createElement("div");
