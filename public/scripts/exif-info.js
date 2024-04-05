@@ -58,8 +58,10 @@ function renderRational(value) {
 	return Math.round((value[0] / value[1]) * 100) / 100;
 }
 
+const cache = new Set();
+
 async function addExifInfo() {
-	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img, .thumb-image");
+	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img, .sqs-lightbox-slideshow .thumb-image");
 
 	if (galleryImagesWrapper?.length > 0) {
 		await import("./lib/piexifjs.js");
@@ -67,6 +69,10 @@ async function addExifInfo() {
 		console.log("FOUND GALLERY ON PAGE. Extracting photos exif data.");
 
 		for (const galleryImage of galleryImagesWrapper) {
+			if (cache.has(galleryImage)) {
+				continue;
+			}
+
 			try {
 				const imageName = galleryImage.attributes["alt"].value;
 				const id = imageName.replace(/\./g, "-");
@@ -104,6 +110,7 @@ async function addExifInfo() {
 				`;
 
 					galleryImage.parentElement.appendChild(newDiv);
+					cache.set(galleryImage);
 				}
 			} catch (e) {
 				console.error("Error extracting Exif data", e);
@@ -124,6 +131,17 @@ async function main() {
 			addExifInfo();
 		}, 2000);
 	}
+
+	const config = { attributes: false, childList: true, subtree: false };
+	const callback = (mutationList) => {
+		for (const mutation of mutationList) {
+			if (mutation.type === "childList") {
+				addExifInfo();
+			}
+		}
+	};
+	const observer = new MutationObserver(callback);
+	observer.observe(document.body, config);
 }
 
 main();
