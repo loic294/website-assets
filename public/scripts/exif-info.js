@@ -71,7 +71,7 @@ async function addExifInfo() {
 			const id = imageName.replace(/\./g, "-");
 
 			const imageUrl = galleryImage.attributes["data-src"].value + "?format=100w";
-			const base64Img = await imageUrlToBase64();
+			const base64Img = await imageUrlToBase64(imageUrl);
 			let exif = debugExif(piexif.load(base64Img));
 
 			const make = exif.Make;
