@@ -71,7 +71,7 @@ async function addExifInfo() {
 				const imageName = galleryImage.attributes["alt"].value;
 				const id = imageName.replace(/\./g, "-");
 
-				const imageUrl = galleryImage.attributes["data-src"].value + "?format=100w";
+				const imageUrl = galleryImage.attributes["data-src"].value + "?format=500w";
 
 				console.log("IMG URL", imageUrl);
 				const base64Img = await imageUrlToBase64(imageUrl);
