@@ -72,8 +72,6 @@ async function addExifInfo() {
 				const id = imageName.replace(/\./g, "-");
 
 				const imageUrl = galleryImage.attributes["data-src"].value + "?format=500w";
-
-				console.log("IMG URL", imageUrl);
 				const base64Img = await imageUrlToBase64(imageUrl);
 				let exif = debugExif(piexif.load(base64Img));
 
@@ -85,7 +83,7 @@ async function addExifInfo() {
 				const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
 				const iso = exif.ISOSpeedRatings;
 
-				console.log("Image", imageName, imageUrl, make, model, aperture);
+				console.log("Image", imageName, imageUrl, exif, make, model, lens, aperture, shutterspeed, focallength, iso);
 
 				if (make || model) {
 					const newDiv = document.createElement("div");
