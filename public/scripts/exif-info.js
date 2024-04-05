@@ -64,6 +64,8 @@ async function main() {
 	if (galleryImagesWrapper?.length > 0) {
 		await import("./lib/piexifjs.js");
 
+		console.log("FOUND GALLERY ON PAGE. Extracting photos exif data.");
+
 		for (const galleryImage of galleryImagesWrapper) {
 			const imageName = galleryImage.attributes["alt"].value;
 			const id = imageName.replace(/\./g, "-");
