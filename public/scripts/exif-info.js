@@ -58,7 +58,7 @@ function renderRational(value) {
 	return Math.round((value[0] / value[1]) * 100) / 100;
 }
 
-async function main() {
+async function addExifInfo() {
 	const galleryImagesWrapper = document.querySelectorAll(".gallery-lightbox-item-img > img, .thumb-image");
 
 	if (galleryImagesWrapper?.length > 0) {
@@ -103,6 +103,20 @@ async function main() {
 				galleryImage.parentElement.appendChild(newDiv);
 			}
 		}
+
+		return true;
+	}
+
+	return false;
+}
+
+async function main() {
+	const result = await addExifInfo();
+
+	if (!result) {
+		setTimeout(() => {
+			addExifInfo();
+		}, 2000);
 	}
 }
 
