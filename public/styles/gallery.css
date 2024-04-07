@@ -64,7 +64,7 @@
 .exif-data:hover ~ .exif-details-wrapper {
 	display: block;
 	position: absolute;
-	bottom: 2.6rem;
+	bottom: 2.8rem;
 	left: 0;
 	width: 100%;
 	display: flex;
