@@ -2,6 +2,11 @@
 	overflow: visible !important;
 }
 
+.gallery-lightbox-controls {
+	top: 3rem;
+	height: calc(100% - 6rem);
+}
+
 @media screen and (max-width: 575px) {
 	.gallery-lightbox .gallery-lightbox-item-wrapper {
 		overflow: visible !important;
