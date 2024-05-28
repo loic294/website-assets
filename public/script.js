@@ -31,6 +31,11 @@ if (!window.disableDevMode) {
 
 async function loadScripts() {
 	await import(contentUrl + "/scripts/newsletter.js");
+	
+	if (window.location.pathname.includes('/my-gear')) {
+		await import(contentUrl + "/scripts/my-gear.js");
+	}
+
 	await import(contentUrl + "/scripts/exif-info.js");
 }
 
