@@ -1,0 +1,25 @@
+.header-layout-branding-center {
+    flex-wrap: wrap;
+}
+
+.header-title-nav-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    flex: 1 0 53%;
+    align-items: center;
+}
+
+.header-layout-branding-center .header-title {
+    width: 12%;
+    flex: 1 1 12%;
+}
+
+.header-layout-branding-center .header-nav {
+    width: 88%;
+    flex: 1 1 88%;
+}
+
+.header-layout-branding-center .header-actions {
+    width: 47%;
+    flex: 1 1 47%;
+}
