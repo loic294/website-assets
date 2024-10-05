@@ -30,6 +30,7 @@ if (!window.disableDevMode) {
 }
 
 async function loadScripts() {
+	await import(contentUrl + "/scripts/languages.js");
 	await import(contentUrl + "/scripts/newsletter.js");
 	
 	if (window.location.pathname.includes('/my-gear')) {
