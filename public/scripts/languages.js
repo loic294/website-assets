@@ -1,8 +1,8 @@
 const pickers = document.getElementsByClassName('language-picker-content');
 
 for (const picker of pickers) {
-    const secondChild = picker.childNodes[1];
-    if (secondChild) {
-        secondChild.href = 'https://loicbellemarealford.ca';
+    const aElem = picker.childNodes[1].firstChild;
+    if (aElem) 
+        aElem.href = 'https://loicbellemarealford.ca';
     }
 }
