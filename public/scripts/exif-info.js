@@ -81,7 +81,6 @@ function parseExifTags(data, tiffStart) {
 		Object.assign(exif, exifIfd);
 	}
 	
-	console.log('All parsed EXIF tags:', Object.keys(exif));
 	return exif;
 }
 
@@ -89,7 +88,6 @@ function parseIFD(data, ifdStart, tiffStart, littleEndian) {
 	const tags = {};
 	
 	const numEntries = readUint16(data, ifdStart, littleEndian);
-	console.log('Parsing IFD with', numEntries, 'entries at offset', ifdStart - tiffStart);
 	
 	for (let i = 0; i < numEntries; i++) {
 		const entryOffset = ifdStart + 2 + (i * 12);
@@ -110,10 +108,6 @@ function parseIFD(data, ifdStart, tiffStart, littleEndian) {
 		const tagName = getTagName(tag);
 		if (tagName) {
 			tags[tagName] = value;
-			console.log(`Found tag ${tag} (${tagName}):`, value);
-		} else {
-			// Log unknown tags that might be important
-			console.log(`Unknown tag ${tag}:`, value);
 		}
 	}
 	
