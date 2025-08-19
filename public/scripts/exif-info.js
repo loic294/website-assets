@@ -9,20 +9,49 @@ function getBase64Image(img) {
 }
 
 const imageUrlToBase64 = async (url) => {
-	return new Promise((resolve, reject) => {
-		const img = new Image();
-		img.crossOrigin = 'anonymous';
-		img.onload = () => {
-			try {
-				const base64 = getBase64Image(img);
-				resolve(base64);
-			} catch (error) {
-				reject(error);
+	try {
+		// First try with fetch
+		const response = await fetch(url, {
+			method: 'GET',
+			headers: {
+				'Accept': 'image/jpeg,image/jpg,image/*,*/*'
+			},
+			mode: 'cors'
+		});
+		
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		
+		const arrayBuffer = await response.arrayBuffer();
+		const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+		return base64;
+	} catch (error) {
+		console.log('Fetch failed, trying with different format:', error);
+		
+		// If original fails, try with a different format that might preserve EXIF
+		const fallbackUrl = url.replace('?format=original', '?format=1500w');
+		try {
+			const response = await fetch(fallbackUrl, {
+				method: 'GET',
+				headers: {
+					'Accept': 'image/jpeg,image/jpg,image/*,*/*'
+				},
+				mode: 'cors'
+			});
+			
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
 			}
-		};
-		img.onerror = reject;
-		img.src = url;
-	});
+			
+			const arrayBuffer = await response.arrayBuffer();
+			const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+			return base64;
+		} catch (fallbackError) {
+			console.log('Fallback also failed:', fallbackError);
+			throw fallbackError;
+		}
+	}
 };
 
 function debugExif(exif) {
