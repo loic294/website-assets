@@ -30,7 +30,7 @@ const imageUrlToBase64 = async (url) => {
 		console.log('Fetch failed, trying with different format:', error);
 		
 		// If original fails, try with a different format that might preserve EXIF
-		const fallbackUrl = url.replace('?format=original', '?format=1500w');
+		const fallbackUrl = url.replace('?format=original', '?format=300w');
 		try {
 			const response = await fetch(fallbackUrl, {
 				method: 'GET',
@@ -109,7 +109,7 @@ async function addExifInfo() {
 				const imageName = galleryImage.attributes["alt"].value;
 				const id = imageName.replace(/\./g, "-");
 
-				const imageUrl = galleryImage.attributes["data-src"].value + "?format=original";
+				const imageUrl = galleryImage.attributes["data-src"].value + "?format=300w";
 				console.log('IMG URL', imageUrl);
 				const base64Img = await imageUrlToBase64(imageUrl);
 				console.log('Base64 prefix:', base64Img.substring(0, 50));
