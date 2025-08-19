@@ -91,90 +91,14 @@ class SquarespaceLanguagePicker {
             languagePickerContent.appendChild(option);
         });
 
-        // Add CSS for the options
+        // Add CSS for the options (styles are now in CSS file)
         this.addLanguageOptionStyles();
     }
 
     addLanguageOptionStyles() {
-        // Check if styles already added
-        if (document.querySelector('#squarespace-language-enhancement-styles')) return;
-
-        const style = document.createElement('style');
-        style.id = 'squarespace-language-enhancement-styles';
-        style.textContent = `
-            #language-picker-menu {
-                background: white;
-                border: 1px solid #e0e0e0;
-                border-radius: 4px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                min-width: 120px;
-                padding: 8px 0;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                z-index: 9999;
-                margin-top: 4px;
-            }
-            
-            .language-option {
-                padding: 8px 16px;
-                cursor: pointer;
-                transition: background-color 0.2s ease;
-                font-size: 14px;
-                line-height: 1.4;
-            }
-            
-            .language-option:hover {
-                background-color: #f5f5f5;
-            }
-            
-            .language-option.current {
-                background-color: #e3f2fd;
-                color: #1976d2;
-                font-weight: 500;
-                cursor: default;
-            }
-            
-            .language-option.current:hover {
-                background-color: #e3f2fd;
-            }
-            
-            .language-option-name {
-                display: block;
-            }
-            
-            /* Dark mode support */
-            @media (prefers-color-scheme: dark) {
-                #language-picker-menu {
-                    background: #2a2a2a;
-                    border-color: #444;
-                    color: white;
-                }
-                
-                .language-option:hover {
-                    background-color: #3a3a3a;
-                }
-                
-                .language-option.current {
-                    background-color: #1565c0;
-                    color: white;
-                }
-                
-                .language-option.current:hover {
-                    background-color: #1565c0;
-                }
-            }
-            
-            /* Hide dropdown by default */
-            .language-picker:not(.active) #language-picker-menu {
-                display: none;
-            }
-            
-            .language-picker.active #language-picker-menu {
-                display: block;
-            }
-        `;
-        document.head.appendChild(style);
+        // CSS styles are now handled in the external CSS file
+        // This method is kept for backwards compatibility
+        return true;
     }
 
     bindEvents() {
