@@ -75,6 +75,13 @@ function parseExifTags(data, tiffStart) {
 	const ifd0 = parseIFD(data, tiffStart + ifdOffset, tiffStart, littleEndian);
 	Object.assign(exif, ifd0);
 	
+	// Look for EXIF sub-IFD in IFD0 (tag 34665)
+	if (ifd0.ExifOffset) {
+		const exifIfd = parseIFD(data, tiffStart + ifd0.ExifOffset, tiffStart, littleEndian);
+		Object.assign(exif, exifIfd);
+	}
+	
+	console.log('All parsed EXIF tags:', Object.keys(exif));
 	return exif;
 }
 
@@ -82,6 +89,7 @@ function parseIFD(data, ifdStart, tiffStart, littleEndian) {
 	const tags = {};
 	
 	const numEntries = readUint16(data, ifdStart, littleEndian);
+	console.log('Parsing IFD with', numEntries, 'entries at offset', ifdStart - tiffStart);
 	
 	for (let i = 0; i < numEntries; i++) {
 		const entryOffset = ifdStart + 2 + (i * 12);
@@ -102,6 +110,10 @@ function parseIFD(data, ifdStart, tiffStart, littleEndian) {
 		const tagName = getTagName(tag);
 		if (tagName) {
 			tags[tagName] = value;
+			console.log(`Found tag ${tag} (${tagName}):`, value);
+		} else {
+			// Log unknown tags that might be important
+			console.log(`Unknown tag ${tag}:`, value);
 		}
 	}
 	
@@ -162,14 +174,34 @@ function getTypeSize(type) {
 
 function getTagName(tag) {
 	const tags = {
+		// Basic image info
 		271: 'Make',
 		272: 'Model',
+		
+		// Lens info
 		42036: 'LensModel',
-		33437: 'FNumber',
-		33434: 'ExposureTime',
-		37386: 'FocalLength',
+		42035: 'LensMake',
+		42037: 'LensSerialNumber',
+		
+		// Camera settings
+		33437: 'FNumber',           // Aperture
+		33434: 'ExposureTime',      // Shutter speed
+		37386: 'FocalLength',       // Focal length
 		41989: 'FocalLengthIn35mmFilm',
-		34855: 'ISOSpeedRatings'
+		34855: 'ISOSpeedRatings',   // ISO
+		
+		// Alternative ISO tags
+		34867: 'DateTimeOriginal',
+		36867: 'DateTimeOriginal',
+		
+		// EXIF sub-IFD pointer
+		34665: 'ExifOffset',
+		
+		// Additional camera data
+		37385: 'Flash',
+		37383: 'MeteringMode',
+		37384: 'LightSource',
+		37396: 'SubjectArea'
 	};
 	return tags[tag];
 }
