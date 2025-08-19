@@ -47,7 +47,7 @@ const imageUrlToBase64 = async (url) => {
 		
 		// Also create a data URL for comparison
 		const dataUrl = `data:image/jpeg;base64,${base64}`;
-		console.log('Data URL for verification:', dataUrl.substring(0, 100) + '...');
+		console.log('Data URL for verification:', dataUrl);
 		
 		return base64;
 	} catch (error) {
@@ -55,6 +55,38 @@ const imageUrlToBase64 = async (url) => {
 		throw error;
 	}
 };
+
+function hasExifData(base64) {
+	try {
+		// Convert base64 to binary for inspection
+		const binary = atob(base64);
+		
+		// Check for JPEG format (starts with FF D8)
+		if (binary.charCodeAt(0) !== 0xFF || binary.charCodeAt(1) !== 0xD8) {
+			console.log('Not a valid JPEG file');
+			return false;
+		}
+		
+		// Look for EXIF marker (FF E1 followed by "Exif")
+		// EXIF data starts with FF E1 XX XX "Exif" 00 00
+		for (let i = 2; i < binary.length - 6; i++) {
+			if (binary.charCodeAt(i) === 0xFF && binary.charCodeAt(i + 1) === 0xE1) {
+				// Check if followed by "Exif"
+				const exifMarker = binary.substr(i + 4, 4);
+				if (exifMarker === 'Exif') {
+					console.log('EXIF data found at position:', i);
+					return true;
+				}
+			}
+		}
+		
+		console.log('No EXIF data found in image');
+		return false;
+	} catch (error) {
+		console.log('Error checking for EXIF data:', error);
+		return false;
+	}
+}
 
 function debugExif(exif) {
 	let exifData = {};
@@ -119,14 +151,34 @@ async function addExifInfo() {
 				try {
 					base64Img = await imageUrlToBase64(originalUrl);
 					console.log('Original base64 prefix:', base64Img.substring(0, 50));
-					exif = debugExif(piexif.load(base64Img));
+					
+					// Check if the image has EXIF data before trying to parse it
+					const hasExif = hasExifData(base64Img);
+					console.log('Has EXIF data:', hasExif);
+					
+					if (hasExif) {
+						exif = debugExif(piexif.load(base64Img));
+					} else {
+						console.log('No EXIF data found, skipping piexif.load');
+						exif = {};
+					}
 				} catch (error) {
 					console.log('Original failed, trying formatted version:', error);
 					const formattedUrl = originalUrl + "?format=300w";
 					console.log('Trying formatted URL:', formattedUrl);
 					base64Img = await imageUrlToBase64(formattedUrl);
 					console.log('Formatted base64 prefix:', base64Img.substring(0, 50));
-					exif = debugExif(piexif.load(base64Img));
+					
+					// Check if the formatted image has EXIF data
+					const hasExif = hasExifData(base64Img);
+					console.log('Formatted image has EXIF data:', hasExif);
+					
+					if (hasExif) {
+						exif = debugExif(piexif.load(base64Img));
+					} else {
+						console.log('No EXIF data found in formatted image, skipping piexif.load');
+						exif = {};
+					}
 				}
 
 				const make = exif.Make;
