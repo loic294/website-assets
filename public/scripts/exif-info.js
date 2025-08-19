@@ -10,7 +10,6 @@ function getBase64Image(img) {
 
 const imageUrlToBase64 = async (url) => {
 	try {
-		// First try with fetch
 		const response = await fetch(url, {
 			method: 'GET',
 			headers: {
@@ -24,33 +23,36 @@ const imageUrlToBase64 = async (url) => {
 		}
 		
 		const arrayBuffer = await response.arrayBuffer();
-		const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+		console.log('ArrayBuffer length:', arrayBuffer.byteLength);
+		
+		// Create blob and object URL for verification
+		const blob = new Blob([arrayBuffer], { type: 'image/jpeg' });
+		const objectUrl = URL.createObjectURL(blob);
+		console.log('Object URL for verification:', objectUrl);
+		
+		// Convert ArrayBuffer to base64 using a more reliable method
+		const uint8Array = new Uint8Array(arrayBuffer);
+		let binaryString = '';
+		for (let i = 0; i < uint8Array.length; i++) {
+			binaryString += String.fromCharCode(uint8Array[i]);
+		}
+		const base64 = btoa(binaryString);
+		
+		console.log('Base64 length:', base64.length);
+		console.log('First 20 chars of base64:', base64.substring(0, 20));
+		
+		// Verify it's a valid JPEG by checking the header
+		const jpegHeader = base64.substring(0, 8);
+		console.log('JPEG header (should start with /9j/):', jpegHeader);
+		
+		// Also create a data URL for comparison
+		const dataUrl = `data:image/jpeg;base64,${base64}`;
+		console.log('Data URL for verification:', dataUrl.substring(0, 100) + '...');
+		
 		return base64;
 	} catch (error) {
-		console.log('Fetch failed, trying with different format:', error);
-		
-		// If original fails, try with a different format that might preserve EXIF
-		const fallbackUrl = url.replace('?format=original', '?format=300w');
-		try {
-			const response = await fetch(fallbackUrl, {
-				method: 'GET',
-				headers: {
-					'Accept': 'image/jpeg,image/jpg,image/*,*/*'
-				},
-				mode: 'cors'
-			});
-			
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
-			
-			const arrayBuffer = await response.arrayBuffer();
-			const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-			return base64;
-		} catch (fallbackError) {
-			console.log('Fallback also failed:', fallbackError);
-			throw fallbackError;
-		}
+		console.log('Fetch failed:', error);
+		throw error;
 	}
 };
 
@@ -109,11 +111,23 @@ async function addExifInfo() {
 				const imageName = galleryImage.attributes["alt"].value;
 				const id = imageName.replace(/\./g, "-");
 
-				const imageUrl = galleryImage.attributes["data-src"].value + "?format=300w";
-				console.log('IMG URL', imageUrl);
-				const base64Img = await imageUrlToBase64(imageUrl);
-				console.log('Base64 prefix:', base64Img.substring(0, 50));
-				let exif = debugExif(piexif.load(base64Img));
+				// Try original image first (more likely to have EXIF)
+				const originalUrl = galleryImage.attributes["data-src"].value;
+				console.log('Trying original URL:', originalUrl);
+				
+				let base64Img, exif;
+				try {
+					base64Img = await imageUrlToBase64(originalUrl);
+					console.log('Original base64 prefix:', base64Img.substring(0, 50));
+					exif = debugExif(piexif.load(base64Img));
+				} catch (error) {
+					console.log('Original failed, trying formatted version:', error);
+					const formattedUrl = originalUrl + "?format=300w";
+					console.log('Trying formatted URL:', formattedUrl);
+					base64Img = await imageUrlToBase64(formattedUrl);
+					console.log('Formatted base64 prefix:', base64Img.substring(0, 50));
+					exif = debugExif(piexif.load(base64Img));
+				}
 
 				const make = exif.Make;
 				const model = exif.Model;
