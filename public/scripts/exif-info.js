@@ -47,7 +47,7 @@ const imageUrlToBase64 = async (url) => {
 		
 		// Also create a data URL for comparison
 		const dataUrl = `data:image/jpeg;base64,${base64}`;
-		console.log('Data URL for verification:', dataUrl);
+		console.log('Data URL for verification:', dataUrl.substring(0, 50) + '...');
 		
 		return base64;
 	} catch (error) {
@@ -158,6 +158,9 @@ async function addExifInfo() {
 					
 					if (hasExif) {
 						exif = debugExif(piexif.load(base64Img));
+						console.log('=== FOUND EXIF DATA ===');
+						console.log('All EXIF data:', exif);
+						console.log('EXIF keys found:', Object.keys(exif));
 					} else {
 						console.log('No EXIF data found, skipping piexif.load');
 						exif = {};
@@ -175,6 +178,9 @@ async function addExifInfo() {
 					
 					if (hasExif) {
 						exif = debugExif(piexif.load(base64Img));
+						console.log('=== FOUND EXIF DATA (FORMATTED) ===');
+						console.log('All EXIF data:', exif);
+						console.log('EXIF keys found:', Object.keys(exif));
 					} else {
 						console.log('No EXIF data found in formatted image, skipping piexif.load');
 						exif = {};
@@ -189,7 +195,17 @@ async function addExifInfo() {
 				const focallength = exif.FocalLengthIn35mmFilm || renderRational(exif.FocalLength);
 				const iso = exif.ISOSpeedRatings;
 
-				console.log("Image", imageName, imageUrl, exif, make, model, lens, aperture, shutterspeed, focallength, iso);
+				console.log('=== EXTRACTED VALUES ===');
+				console.log('Make:', make);
+				console.log('Model:', model);
+				console.log('Lens:', lens);
+				console.log('Aperture (FNumber):', exif.FNumber, '-> rendered:', aperture);
+				console.log('Shutter Speed (ExposureTime):', exif.ExposureTime, '-> rendered:', shutterspeed);
+				console.log('Focal Length (35mm):', exif.FocalLengthIn35mmFilm);
+				console.log('Focal Length:', exif.FocalLength, '-> rendered focal length:', focallength);
+				console.log('ISO:', iso);
+
+				console.log("Image", imageName, exif, make, model, lens, aperture, shutterspeed, focallength, iso);
 
 				if (make || model) {
 					const newDiv = document.createElement("div");
