@@ -9,21 +9,19 @@ function getBase64Image(img) {
 }
 
 const imageUrlToBase64 = async (url) => {
-	const data = await fetch(url, {
-		headers: {
-			'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-		},
-		mode: 'no-cors'
-	});
-	const blob = await data.blob();
 	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.readAsDataURL(blob);
-		reader.onloadend = () => {
-			const base64data = reader.result;
-			resolve(base64data);
+		const img = new Image();
+		img.crossOrigin = 'anonymous';
+		img.onload = () => {
+			try {
+				const base64 = getBase64Image(img);
+				resolve(`data:image/jpeg;base64,${base64}`);
+			} catch (error) {
+				reject(error);
+			}
 		};
-		reader.onerror = reject;
+		img.onerror = reject;
+		img.src = url;
 	});
 };
 
@@ -82,9 +80,10 @@ async function addExifInfo() {
 				const imageName = galleryImage.attributes["alt"].value;
 				const id = imageName.replace(/\./g, "-");
 
-				const imageUrl = galleryImage.attributes["data-src"].value + "?format=300w";
+				const imageUrl = galleryImage.attributes["data-src"].value + "?format=original";
 				console.log('IMG URL', imageUrl);
 				const base64Img = await imageUrlToBase64(imageUrl);
+				console.log('Base64 prefix:', base64Img.substring(0, 50));
 				let exif = debugExif(piexif.load(base64Img));
 
 				const make = exif.Make;
