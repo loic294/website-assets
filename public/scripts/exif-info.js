@@ -9,7 +9,12 @@ function getBase64Image(img) {
 }
 
 const imageUrlToBase64 = async (url) => {
-	const data = await fetch(url);
+	const data = await fetch(url, {
+		headers: {
+			'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+		},
+		mode: 'no-cors'
+	});
 	const blob = await data.blob();
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
@@ -77,7 +82,7 @@ async function addExifInfo() {
 				const imageName = galleryImage.attributes["alt"].value;
 				const id = imageName.replace(/\./g, "-");
 
-				const imageUrl = galleryImage.attributes["data-src"].value;
+				const imageUrl = galleryImage.attributes["data-src"].value + "?format=300w";
 				console.log('IMG URL', imageUrl);
 				const base64Img = await imageUrlToBase64(imageUrl);
 				let exif = debugExif(piexif.load(base64Img));
