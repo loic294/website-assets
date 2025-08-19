@@ -56,6 +56,183 @@ const imageUrlToBase64 = async (url) => {
 	}
 };
 
+function parseExifData(base64) {
+	try {
+		const binary = atob(base64);
+		const data = new Uint8Array(binary.length);
+		for (let i = 0; i < binary.length; i++) {
+			data[i] = binary.charCodeAt(i);
+		}
+		
+		// Check for JPEG format
+		if (data[0] !== 0xFF || data[1] !== 0xD8) {
+			console.log('Not a valid JPEG file');
+			return null;
+		}
+		
+		// Find EXIF segment
+		let offset = 2;
+		while (offset < data.length - 1) {
+			if (data[offset] === 0xFF && data[offset + 1] === 0xE1) {
+				// Found APP1 segment (EXIF)
+				const segmentLength = (data[offset + 2] << 8) | data[offset + 3];
+				
+				// Check for "Exif\0\0" identifier
+				if (data[offset + 4] === 0x45 && data[offset + 5] === 0x78 && 
+					data[offset + 6] === 0x69 && data[offset + 7] === 0x66 &&
+					data[offset + 8] === 0x00 && data[offset + 9] === 0x00) {
+					
+					console.log('Found EXIF segment at offset:', offset);
+					console.log('Segment length:', segmentLength);
+					
+					// Start parsing TIFF header (after "Exif\0\0")
+					const tiffStart = offset + 10;
+					const exifData = parseExifTags(data, tiffStart);
+					return exifData;
+				}
+			}
+			offset += 2;
+		}
+		
+		console.log('No EXIF data found');
+		return null;
+	} catch (error) {
+		console.log('Error parsing EXIF:', error);
+		return null;
+	}
+}
+
+function parseExifTags(data, tiffStart) {
+	const exif = {};
+	
+	try {
+		// Read TIFF header
+		const byteOrder = String.fromCharCode(data[tiffStart], data[tiffStart + 1]);
+		const littleEndian = byteOrder === 'II';
+		console.log('Byte order:', byteOrder, 'Little endian:', littleEndian);
+		
+		// Read magic number (should be 42)
+		const magic = readUint16(data, tiffStart + 2, littleEndian);
+		console.log('Magic number:', magic);
+		
+		// Read offset to first IFD
+		const ifdOffset = readUint32(data, tiffStart + 4, littleEndian);
+		console.log('IFD offset:', ifdOffset);
+		
+		// Parse IFD0 (main image)
+		const ifd0 = parseIFD(data, tiffStart + ifdOffset, tiffStart, littleEndian);
+		Object.assign(exif, ifd0);
+		
+		console.log('Parsed EXIF tags:', Object.keys(exif));
+		return exif;
+	} catch (error) {
+		console.log('Error parsing TIFF data:', error);
+		return {};
+	}
+}
+
+function parseIFD(data, ifdStart, tiffStart, littleEndian) {
+	const tags = {};
+	
+	try {
+		const numEntries = readUint16(data, ifdStart, littleEndian);
+		console.log('Number of IFD entries:', numEntries);
+		
+		for (let i = 0; i < numEntries; i++) {
+			const entryOffset = ifdStart + 2 + (i * 12);
+			const tag = readUint16(data, entryOffset, littleEndian);
+			const type = readUint16(data, entryOffset + 2, littleEndian);
+			const count = readUint32(data, entryOffset + 4, littleEndian);
+			
+			let value;
+			if (getTypeSize(type) * count <= 4) {
+				// Value fits in 4 bytes
+				value = readValue(data, entryOffset + 8, type, count, littleEndian);
+			} else {
+				// Value is stored at offset
+				const valueOffset = readUint32(data, entryOffset + 8, littleEndian);
+				value = readValue(data, tiffStart + valueOffset, type, count, littleEndian);
+			}
+			
+			const tagName = getTagName(tag);
+			if (tagName) {
+				tags[tagName] = value;
+				console.log(`Tag ${tag} (${tagName}):`, value);
+			}
+		}
+	} catch (error) {
+		console.log('Error parsing IFD:', error);
+	}
+	
+	return tags;
+}
+
+function readUint16(data, offset, littleEndian) {
+	if (littleEndian) {
+		return data[offset] | (data[offset + 1] << 8);
+	} else {
+		return (data[offset] << 8) | data[offset + 1];
+	}
+}
+
+function readUint32(data, offset, littleEndian) {
+	if (littleEndian) {
+		return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24);
+	} else {
+		return (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
+	}
+}
+
+function readValue(data, offset, type, count, littleEndian) {
+	switch (type) {
+		case 1: // BYTE
+			return count === 1 ? data[offset] : Array.from(data.slice(offset, offset + count));
+		case 2: // ASCII
+			let str = '';
+			for (let i = 0; i < count - 1; i++) { // -1 to exclude null terminator
+				str += String.fromCharCode(data[offset + i]);
+			}
+			return str;
+		case 3: // SHORT
+			if (count === 1) {
+				return readUint16(data, offset, littleEndian);
+			} else {
+				const values = [];
+				for (let i = 0; i < count; i++) {
+					values.push(readUint16(data, offset + i * 2, littleEndian));
+				}
+				return values;
+			}
+		case 4: // LONG
+			return readUint32(data, offset, littleEndian);
+		case 5: // RATIONAL
+			const numerator = readUint32(data, offset, littleEndian);
+			const denominator = readUint32(data, offset + 4, littleEndian);
+			return [numerator, denominator];
+		default:
+			return null;
+	}
+}
+
+function getTypeSize(type) {
+	const sizes = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8 };
+	return sizes[type] || 0;
+}
+
+function getTagName(tag) {
+	const tags = {
+		271: 'Make',
+		272: 'Model',
+		42036: 'LensModel',
+		33437: 'FNumber',
+		33434: 'ExposureTime',
+		37386: 'FocalLength',
+		41989: 'FocalLengthIn35mmFilm',
+		34855: 'ISOSpeedRatings'
+	};
+	return tags[tag];
+}
+
 function hasExifData(base64) {
 	try {
 		// Convert base64 to binary for inspection
@@ -157,17 +334,17 @@ async function addExifInfo() {
 					console.log('Has EXIF data:', hasExif);
 					
 					if (hasExif) {
-						exif = debugExif(piexif.load(base64Img));
-						console.log('=== FOUND EXIF DATA ===');
-						console.log('All EXIF data:', exif);
+						console.log('=== USING CUSTOM EXIF PARSER ===');
+						exif = parseExifData(base64Img) || {};
+						console.log('Custom parser result:', exif);
 						console.log('EXIF keys found:', Object.keys(exif));
 					} else {
-						console.log('No EXIF data found, skipping piexif.load');
+						console.log('No EXIF data found, skipping parsing');
 						exif = {};
 					}
 				} catch (error) {
 					console.log('Original failed, trying formatted version:', error);
-					const formattedUrl = originalUrl + "?format=300w";
+					const formattedUrl = originalUrl + "?format=750w";
 					console.log('Trying formatted URL:', formattedUrl);
 					base64Img = await imageUrlToBase64(formattedUrl);
 					console.log('Formatted base64 prefix:', base64Img.substring(0, 50));
@@ -177,12 +354,12 @@ async function addExifInfo() {
 					console.log('Formatted image has EXIF data:', hasExif);
 					
 					if (hasExif) {
-						exif = debugExif(piexif.load(base64Img));
-						console.log('=== FOUND EXIF DATA (FORMATTED) ===');
-						console.log('All EXIF data:', exif);
+						console.log('=== USING CUSTOM EXIF PARSER (FORMATTED) ===');
+						exif = parseExifData(base64Img) || {};
+						console.log('Custom parser result:', exif);
 						console.log('EXIF keys found:', Object.keys(exif));
 					} else {
-						console.log('No EXIF data found in formatted image, skipping piexif.load');
+						console.log('No EXIF data found in formatted image, skipping parsing');
 						exif = {};
 					}
 				}
