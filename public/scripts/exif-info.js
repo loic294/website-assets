@@ -4,7 +4,7 @@ function getBase64Image(img) {
 	canvas.height = img.height;
 	var ctx = canvas.getContext("2d");
 	ctx.drawImage(img, 0, 0);
-	var dataURL = canvas.toDataURL("image/png");
+	var dataURL = canvas.toDataURL("image/jpeg", 0.9);
 	return dataURL.replace(/^data:image\/?[A-z]*;base64,/);
 }
 
@@ -15,7 +15,7 @@ const imageUrlToBase64 = async (url) => {
 		img.onload = () => {
 			try {
 				const base64 = getBase64Image(img);
-				resolve(`data:image/jpeg;base64,${base64}`);
+				resolve(base64);
 			} catch (error) {
 				reject(error);
 			}
